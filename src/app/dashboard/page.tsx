@@ -6,7 +6,10 @@ import { Suspense } from "react";
 import { CategoryBar } from "@/components/category-bar";
 import { DashboardHeader } from "@/components/dashboard-header";
 import { NewsCard, currentTime } from "@/components/news-card";
+import { Pagination } from "@/components/pagination";
 import {
+  DASHBOARD_PAGE_SIZE,
+  getDashboardArticleCount,
   getDashboardArticles,
   getUserCategories,
   isCategoryId,
@@ -38,14 +41,21 @@ async function DashboardContent({
   const { userId } = await auth();
   if (!userId) redirect("/");
 
-  const { category } = await searchParams;
+  const { category, page: pageParam } = await searchParams;
   const requested = typeof category === "string" ? category : undefined;
   const categoryId = isCategoryId(requested) ? requested : undefined;
 
-  const [categories, articles] = await Promise.all([
+  const [categories, total] = await Promise.all([
     getUserCategories(userId),
-    getDashboardArticles(userId, categoryId),
+    getDashboardArticleCount(userId, categoryId),
   ]);
+  // 잘못되었거나 범위를 벗어난 page 값은 가까운 유효 페이지로 맞춘다.
+  const totalPages = Math.max(1, Math.ceil(total / DASHBOARD_PAGE_SIZE));
+  const requestedPage = Number(typeof pageParam === "string" ? pageParam : 1);
+  const page = Number.isInteger(requestedPage)
+    ? Math.min(Math.max(requestedPage, 1), totalPages)
+    : 1;
+  const articles = await getDashboardArticles(userId, categoryId, page);
   const now = currentTime();
 
   return (
@@ -64,6 +74,7 @@ async function DashboardContent({
           ))}
         </div>
       )}
+      <Pagination page={page} totalPages={totalPages} categoryId={categoryId} />
     </>
   );
 }

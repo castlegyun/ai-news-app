@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, sql } from "drizzle-orm";
+import { and, asc, count, desc, eq, sql } from "drizzle-orm";
 
 import { db } from "./index";
 import {
@@ -8,7 +8,7 @@ import {
   savedArticles,
 } from "./schema";
 
-const DASHBOARD_ARTICLE_LIMIT = 60;
+export const DASHBOARD_PAGE_SIZE = 9;
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -33,6 +33,7 @@ export async function getUserCategories(userId: string) {
 export async function getDashboardArticles(
   userId: string,
   categoryId?: string,
+  page = 1,
 ) {
   return db
     .select({
@@ -72,9 +73,41 @@ export async function getDashboardArticles(
       desc(sql`coalesce(${articles.publishedAt}, ${articles.createdAt})`),
       desc(articles.createdAt),
     )
-    .limit(DASHBOARD_ARTICLE_LIMIT);
+    .limit(DASHBOARD_PAGE_SIZE)
+    .offset((page - 1) * DASHBOARD_PAGE_SIZE);
 }
 
-export type DashboardArticle = Awaited<
+// 페이지 수 계산용 전체 기사 수. 카테고리 필터는 getDashboardArticles와 같은 조건을 쓴다.
+export async function getDashboardArticleCount(
+  userId: string,
+  categoryId?: string,
+) {
+  const query = db.select({ total: count() }).from(articles);
+  const [row] = categoryId
+    ? await query
+        .innerJoin(
+          articleCategories,
+          and(
+            eq(articleCategories.articleId, articles.id),
+            eq(articleCategories.userId, userId),
+          ),
+        )
+        .where(eq(articleCategories.categoryId, categoryId))
+    : await query;
+  return row.total;
+}
+
+// url이 이미 있는 기사는 건너뛰고, 실제로 새로 저장된 개수를 반환한다.
+export async function insertArticles(rows: (typeof articles.$inferInsert)[]) {
+  if (rows.length === 0) return 0;
+  const inserted = await db
+    .insert(articles)
+    .values(rows)
+    .onConflictDoNothing({ target: articles.url })
+    .returning({ id: articles.id });
+  return inserted.length;
+}
+
+export type DashboardArticle =Awaited<
   ReturnType<typeof getDashboardArticles>
 >[number];
