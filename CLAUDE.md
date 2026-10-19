@@ -6,6 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 AI 뉴스 수집기: 해외 AI 뉴스를 RSS로 수집하고, Claude로 한국어 번역·요약·카테고리 분류를 한 뒤, 선택한 기사를 Notion에 저장하는 한국어 웹앱. 요구사항의 기준 문서는 `PRD.md`이며, 기능을 만들기 전에 반드시 읽을 것.
 
+UI를 만들거나 수정할 때는 `ui.md`(화면 구성, Tailwind 스타일 규칙, 컴포넌트 가이드)를 먼저 읽고 따를 것.
+
 현재는 `create-next-app` 기본 스캐폴드만 있고 앱 코드는 없다. 아래 기술 스택 중 Next.js 외의 패키지는 **아직 설치되지 않았다**. 구현 단계마다 필요할 때 추가한다.
 
 ## 명령어
