@@ -178,6 +178,52 @@ export async function saveArticleCategories(
     .onConflictDoNothing();
 }
 
+// Notion 저장에 필요한 기사 정보와 이 사용자의 카테고리·저장 기록.
+export async function getArticleForSave(userId: string, articleId: string) {
+  const [row] = await db
+    .select({
+      title: articles.title,
+      titleKo: articles.titleKo,
+      summaryKo: articles.summaryKo,
+      excerpt: articles.excerpt,
+      url: articles.url,
+      publishedAt: articles.publishedAt,
+      createdAt: articles.createdAt,
+      categoryName: categories.name,
+      savedAt: savedArticles.savedAt,
+    })
+    .from(articles)
+    .leftJoin(
+      articleCategories,
+      and(
+        eq(articleCategories.articleId, articles.id),
+        eq(articleCategories.userId, userId),
+      ),
+    )
+    .leftJoin(categories, eq(categories.id, articleCategories.categoryId))
+    .leftJoin(
+      savedArticles,
+      and(
+        eq(savedArticles.articleId, articles.id),
+        eq(savedArticles.userId, userId),
+      ),
+    )
+    .where(eq(articles.id, articleId))
+    .limit(1);
+  return row;
+}
+
+export async function saveArticleRecord(
+  userId: string,
+  articleId: string,
+  notionPageId: string,
+) {
+  await db
+    .insert(savedArticles)
+    .values({ userId, articleId, notionPageId })
+    .onConflictDoNothing();
+}
+
 export type DashboardArticle =Awaited<
   ReturnType<typeof getDashboardArticles>
 >[number];
