@@ -1,8 +1,24 @@
 import { auth } from "@clerk/nextjs/server";
 
-import { insertArticles } from "@/db/queries";
+import {
+  getUnclassifiedArticles,
+  getUntranslatedArticles,
+  getUserCategories,
+  insertArticles,
+  saveArticleCategories,
+  updateArticleTranslations,
+} from "@/db/queries";
+import { classifyArticles } from "@/lib/ai/classify";
+import { translateAndSummarize } from "@/lib/ai/translate";
+import { ensureDefaultCategories } from "@/lib/categories/ensure-defaults";
 import { collectRecentArticles } from "@/lib/rss/collect";
 import { FEED_SOURCES } from "@/lib/rss/sources";
+
+// Claude 배치 호출이 있어 기본 타임아웃보다 길게 잡는다.
+export const maxDuration = 60;
+
+// 한 번에 처리할 번역·분류 대상 상한. 실패분은 다음 가져오기에서 이어서 처리한다.
+const AI_LIMIT = 60;
 
 export async function POST() {
   const { userId } = await auth();
@@ -27,10 +43,36 @@ export async function POST() {
     const unique = [...new Map(articles.map((a) => [a.url, a])).values()];
     const inserted = await insertArticles(unique);
 
+    // 번역·요약은 공용이라 기사당 1회만: 방금 저장한 기사 + 이전에 실패한 기사.
+    const pending = new Map(
+      [...inserted, ...(await getUntranslatedArticles(AI_LIMIT))].map((a) => [
+        a.id,
+        { id: a.id, title: a.title, excerpt: a.excerpt ?? "" },
+      ]),
+    );
+    const translations = await translateAndSummarize([...pending.values()]);
+    await updateArticleTranslations(translations);
+
+    // 분류는 사용자별: 이 사용자에게 아직 분류되지 않은 번역 완료 기사.
+    await ensureDefaultCategories(userId);
+    const userCategories = await getUserCategories(userId);
+    const unclassified = await getUnclassifiedArticles(userId, AI_LIMIT);
+    const classifications = await classifyArticles(
+      unclassified.map((a) => ({
+        id: a.id,
+        titleKo: a.titleKo ?? "",
+        summaryKo: a.summaryKo ?? "",
+      })),
+      userCategories,
+    );
+    await saveArticleCategories(userId, classifications);
+
     return Response.json({
       fetched: unique.length,
-      inserted,
-      skipped: unique.length - inserted,
+      inserted: inserted.length,
+      skipped: unique.length - inserted.length,
+      translated: translations.length,
+      classified: classifications.length,
       failedSources,
     });
   } catch (error) {
