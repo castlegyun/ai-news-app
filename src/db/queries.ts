@@ -1,4 +1,4 @@
-import { and, asc, count, desc, eq, sql } from "drizzle-orm";
+import { and, asc, count, desc, eq, isNull, sql } from "drizzle-orm";
 
 import { db } from "./index";
 import {
@@ -22,6 +22,7 @@ export async function getUserCategories(userId: string) {
     .select({
       id: categories.id,
       name: categories.name,
+      description: categories.description,
       color: categories.color,
     })
     .from(categories)
@@ -97,15 +98,84 @@ export async function getDashboardArticleCount(
   return row.total;
 }
 
-// url이 이미 있는 기사는 건너뛰고, 실제로 새로 저장된 개수를 반환한다.
+// url이 이미 있는 기사는 건너뛰고, 실제로 새로 저장된 기사 행을 반환한다.
 export async function insertArticles(rows: (typeof articles.$inferInsert)[]) {
-  if (rows.length === 0) return 0;
-  const inserted = await db
+  if (rows.length === 0) return [];
+  return db
     .insert(articles)
     .values(rows)
     .onConflictDoNothing({ target: articles.url })
-    .returning({ id: articles.id });
-  return inserted.length;
+    .returning({
+      id: articles.id,
+      title: articles.title,
+      excerpt: articles.excerpt,
+    });
+}
+
+// 번역·요약이 아직 없는 기사(이전 실행에서 실패한 것 포함).
+export async function getUntranslatedArticles(limit: number) {
+  return db
+    .select({
+      id: articles.id,
+      title: articles.title,
+      excerpt: articles.excerpt,
+    })
+    .from(articles)
+    .where(isNull(articles.titleKo))
+    .orderBy(desc(articles.createdAt))
+    .limit(limit);
+}
+
+export async function updateArticleTranslations(
+  rows: { id: string; titleKo: string; summaryKo: string }[],
+) {
+  await Promise.all(
+    rows.map((r) =>
+      db
+        .update(articles)
+        .set({ titleKo: r.titleKo, summaryKo: r.summaryKo })
+        .where(eq(articles.id, r.id)),
+    ),
+  );
+}
+
+// 번역은 끝났지만 이 사용자에게는 아직 분류되지 않은 기사.
+export async function getUnclassifiedArticles(userId: string, limit: number) {
+  return db
+    .select({
+      id: articles.id,
+      titleKo: articles.titleKo,
+      summaryKo: articles.summaryKo,
+    })
+    .from(articles)
+    .leftJoin(
+      articleCategories,
+      and(
+        eq(articleCategories.articleId, articles.id),
+        eq(articleCategories.userId, userId),
+      ),
+    )
+    .where(
+      and(
+        sql`${articles.titleKo} is not null`,
+        isNull(articleCategories.articleId),
+      ),
+    )
+    .orderBy(desc(articles.createdAt))
+    .limit(limit);
+}
+
+export async function saveArticleCategories(
+  userId: string,
+  rows: { id: string; categoryId: string }[],
+) {
+  if (rows.length === 0) return;
+  await db
+    .insert(articleCategories)
+    .values(
+      rows.map((r) => ({ userId, articleId: r.id, categoryId: r.categoryId })),
+    )
+    .onConflictDoNothing();
 }
 
 export type DashboardArticle =Awaited<

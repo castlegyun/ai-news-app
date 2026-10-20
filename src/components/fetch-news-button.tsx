@@ -7,6 +7,7 @@ type Message = { kind: "success" | "error"; text: string };
 
 type FetchResponse = {
   inserted?: number;
+  translated?: number;
   failedSources?: string[];
   error?: string;
 };
@@ -40,9 +41,17 @@ export function FetchNewsButton() {
       const failed = data.failedSources ?? [];
       const base =
         inserted > 0 ? `새 기사 ${inserted}건을 가져왔습니다` : "새 기사가 없습니다";
+      const translated = data.translated ?? 0;
+      const pendingAi = inserted > translated;
       setMessage({
         kind: "success",
-        text: failed.length ? `${base} (${failed.join(", ")} 수집 실패)` : base,
+        text: [
+          base,
+          pendingAi ? `(번역 ${inserted - translated}건 대기, 다시 시도해 주세요)` : "",
+          failed.length ? `(${failed.join(", ")} 수집 실패)` : "",
+        ]
+          .filter(Boolean)
+          .join(" "),
       });
       startRefresh(() => router.refresh());
     } catch {
