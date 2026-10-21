@@ -7,6 +7,7 @@ import { CategoryBar } from "@/components/category-bar";
 import { DashboardHeader } from "@/components/dashboard-header";
 import { NewsCard, currentTime } from "@/components/news-card";
 import { Pagination } from "@/components/pagination";
+import { SearchBar } from "@/components/search-bar";
 import {
   DASHBOARD_PAGE_SIZE,
   getDashboardArticleCount,
@@ -41,13 +42,14 @@ async function DashboardContent({
   const { userId } = await auth();
   if (!userId) redirect("/");
 
-  const { category, page: pageParam } = await searchParams;
+  const { category, page: pageParam, q } = await searchParams;
   const requested = typeof category === "string" ? category : undefined;
   const categoryId = isCategoryId(requested) ? requested : undefined;
+  const keyword = (typeof q === "string" ? q.trim() : "").slice(0, 100) || undefined;
 
   const [categories, total] = await Promise.all([
     getUserCategories(userId),
-    getDashboardArticleCount(userId, categoryId),
+    getDashboardArticleCount(userId, categoryId, keyword),
   ]);
   // 잘못되었거나 범위를 벗어난 page 값은 가까운 유효 페이지로 맞춘다.
   const totalPages = Math.max(1, Math.ceil(total / DASHBOARD_PAGE_SIZE));
@@ -55,17 +57,31 @@ async function DashboardContent({
   const page = Number.isInteger(requestedPage)
     ? Math.min(Math.max(requestedPage, 1), totalPages)
     : 1;
-  const articles = await getDashboardArticles(userId, categoryId, page);
+  const articles = await getDashboardArticles(userId, categoryId, page, keyword);
   const now = currentTime();
 
   return (
     <>
-      <CategoryBar categories={categories} activeId={categoryId} />
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+        <CategoryBar
+          categories={categories}
+          activeId={categoryId}
+          keyword={keyword}
+        />
+        <SearchBar keyword={keyword} categoryId={categoryId} />
+      </div>
+      {keyword && (
+        <p className="text-sm text-zinc-500">
+          &lsquo;{keyword}&rsquo; 검색 결과 {total}건
+        </p>
+      )}
       {articles.length === 0 ? (
         <div className="rounded-xl border border-dashed border-zinc-300 py-16 text-center text-sm text-zinc-500 dark:border-zinc-700">
-          {categoryId
-            ? "이 카테고리에 해당하는 기사가 없습니다"
-            : "아직 가져온 뉴스가 없습니다"}
+          {keyword
+            ? "검색 결과가 없습니다"
+            : categoryId
+              ? "이 카테고리에 해당하는 기사가 없습니다"
+              : "아직 가져온 뉴스가 없습니다"}
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -74,7 +90,12 @@ async function DashboardContent({
           ))}
         </div>
       )}
-      <Pagination page={page} totalPages={totalPages} categoryId={categoryId} />
+      <Pagination
+        page={page}
+        totalPages={totalPages}
+        categoryId={categoryId}
+        keyword={keyword}
+      />
     </>
   );
 }
@@ -82,7 +103,10 @@ async function DashboardContent({
 function DashboardSkeleton() {
   return (
     <div role="status" aria-label="불러오는 중" className="space-y-6">
-      <div className="h-9 w-72 animate-pulse rounded-full bg-zinc-200 dark:bg-zinc-800" />
+      <div className="flex justify-between gap-3">
+        <div className="h-9 w-72 animate-pulse rounded-full bg-zinc-200 dark:bg-zinc-800" />
+        <div className="hidden h-10 w-96 animate-pulse rounded-lg bg-zinc-200 lg:block dark:bg-zinc-800" />
+      </div>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {Array.from({ length: 6 }, (_, i) => (
           <div

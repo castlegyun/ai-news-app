@@ -12,14 +12,25 @@ type Category = { id: string; name: string };
 export function CategoryBar({
   categories,
   activeId,
+  keyword,
 }: {
   categories: Category[];
   activeId?: string;
+  keyword?: string;
 }) {
+  // 검색어가 있으면 카테고리를 바꿔도 유지한다.
+  const href = (categoryId?: string) => {
+    const params = new URLSearchParams();
+    if (categoryId) params.set("category", categoryId);
+    if (keyword) params.set("q", keyword);
+    const qs = params.toString();
+    return qs ? `/dashboard?${qs}` : "/dashboard";
+  };
+
   return (
     <nav aria-label="카테고리" className="flex flex-wrap items-center gap-2">
       <Link
-        href="/dashboard"
+        href={href()}
         aria-current={activeId ? undefined : "true"}
         className={`${chipBase} ${activeId ? chipIdle : chipActive}`}
       >
@@ -28,7 +39,7 @@ export function CategoryBar({
       {categories.map((c) => (
         <Link
           key={c.id}
-          href={`/dashboard?category=${c.id}`}
+          href={href(c.id)}
           aria-current={activeId === c.id ? "true" : undefined}
           className={`${chipBase} ${activeId === c.id ? chipActive : chipIdle}`}
         >

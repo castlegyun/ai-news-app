@@ -1,4 +1,4 @@
-import { and, asc, count, desc, eq, isNull, sql } from "drizzle-orm";
+import { and, asc, count, desc, eq, ilike, isNull, or, sql } from "drizzle-orm";
 
 import { db } from "./index";
 import {
@@ -15,6 +15,18 @@ const UUID_RE =
 
 export function isCategoryId(value: string | undefined): value is string {
   return !!value && UUID_RE.test(value);
+}
+
+// 원문·한국어 제목과 요약에서 키워드를 찾는다. LIKE 와일드카드는 이스케이프한다.
+function keywordFilter(keyword?: string) {
+  if (!keyword) return undefined;
+  const pattern = `%${keyword.replace(/[\\%_]/g, "\\$&")}%`;
+  return or(
+    ilike(articles.title, pattern),
+    ilike(articles.titleKo, pattern),
+    ilike(articles.summaryKo, pattern),
+    ilike(articles.excerpt, pattern),
+  );
 }
 
 export async function getUserCategories(userId: string) {
@@ -35,6 +47,7 @@ export async function getDashboardArticles(
   userId: string,
   categoryId?: string,
   page = 1,
+  keyword?: string,
 ) {
   return db
     .select({
@@ -68,7 +81,10 @@ export async function getDashboardArticles(
       ),
     )
     .where(
-      categoryId ? eq(articleCategories.categoryId, categoryId) : undefined,
+      and(
+        categoryId ? eq(articleCategories.categoryId, categoryId) : undefined,
+        keywordFilter(keyword),
+      ),
     )
     .orderBy(
       desc(sql`coalesce(${articles.publishedAt}, ${articles.createdAt})`),
@@ -82,6 +98,7 @@ export async function getDashboardArticles(
 export async function getDashboardArticleCount(
   userId: string,
   categoryId?: string,
+  keyword?: string,
 ) {
   const query = db.select({ total: count() }).from(articles);
   const [row] = categoryId
@@ -93,8 +110,13 @@ export async function getDashboardArticleCount(
             eq(articleCategories.userId, userId),
           ),
         )
-        .where(eq(articleCategories.categoryId, categoryId))
-    : await query;
+        .where(
+          and(
+            eq(articleCategories.categoryId, categoryId),
+            keywordFilter(keyword),
+          ),
+        )
+    : await query.where(keywordFilter(keyword));
   return row.total;
 }
 

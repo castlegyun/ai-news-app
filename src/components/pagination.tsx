@@ -30,10 +30,12 @@ export function Pagination({
   page,
   totalPages,
   categoryId,
+  keyword,
 }: {
   page: number;
   totalPages: number;
   categoryId?: string;
+  keyword?: string;
 }) {
   if (totalPages <= 1) return null;
 
@@ -41,6 +43,7 @@ export function Pagination({
   const href = (p: number) => {
     const params = new URLSearchParams();
     if (categoryId) params.set("category", categoryId);
+    if (keyword) params.set("q", keyword);
     if (p > 1) params.set("page", String(p));
     const qs = params.toString();
     return qs ? `/dashboard?${qs}` : "/dashboard";
