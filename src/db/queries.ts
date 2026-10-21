@@ -246,6 +246,15 @@ export async function saveArticleRecord(
     .onConflictDoNothing();
 }
 
+// article_categories, saved_articles는 onDelete cascade로 함께 지워진다.
+export async function deleteArticle(articleId: string) {
+  const rows = await db
+    .delete(articles)
+    .where(eq(articles.id, articleId))
+    .returning({ id: articles.id });
+  return rows.length > 0;
+}
+
 export type DashboardArticle =Awaited<
   ReturnType<typeof getDashboardArticles>
 >[number];

@@ -1,3 +1,4 @@
+import { DeleteButton } from "@/components/delete-button";
 import { SaveButton } from "@/components/save-button";
 import type { DashboardArticle } from "@/db/queries";
 
@@ -54,8 +55,9 @@ export function NewsCard({
   const saved = article.savedAt !== null;
 
   return (
-    <article className="flex h-full flex-col gap-3 rounded-xl border border-zinc-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
-      <div className="flex items-center gap-1.5 text-xs text-zinc-500">
+    <article className="relative flex h-full flex-col gap-3 rounded-xl border border-zinc-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
+      <DeleteButton articleId={article.id} />
+      <div className="flex items-center gap-1.5 pr-8 text-xs text-zinc-500">
         <span>{article.source}</span>
         <span aria-hidden="true">·</span>
         <time dateTime={published.toISOString()}>
