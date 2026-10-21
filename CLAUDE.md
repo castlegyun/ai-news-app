@@ -17,6 +17,11 @@ UI를 만들거나 수정할 때는 `ui.md`(화면 구성, Tailwind 스타일 �
 - `npm run lint` — ESLint (flat config, `eslint.config.mjs`)
 - 테스트 러너는 설정되어 있지 않다.
 
+## 커스텀 명령어
+
+- `/news-workflow <브랜치-이름>` (`.claude/commands/news-workflow.md`) — 새 기능 개발 워크플로우. main 확인 → 새 브랜치 생성(이름이 없으면 기능을 물어보고 영어 소문자-하이픈 이름을 제안) → 프로젝트 컨벤션 안내 → '완료'/'done' 입력 시 변경 파일 목록과 커밋 메시지 제안 후 사용자 확인을 받아 커밋하고 main에 병합 → 작업 요약.
+- `/new-branch <브랜치-이름>` — main에서 새 브랜치만 생성.
+
 ## Next.js 버전 주의
 
 `next`는 16.4.2, React는 19.3으로, 이전 버전과 호환되지 않는 변경이 있다. `next dev`가 자동 관리하는 `AGENTS.md`는 Next.js 코드를 작성하기 전에 `node_modules/next/dist/docs/`의 관련 가이드를 읽고, 폐기(deprecation) 안내를 따르라고 요구한다.
