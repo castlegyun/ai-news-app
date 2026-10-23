@@ -6,12 +6,14 @@ import { Suspense } from "react";
 import { CategoryBar } from "@/components/category-bar";
 import { DashboardHeader } from "@/components/dashboard-header";
 import { NewsCard, currentTime } from "@/components/news-card";
+import { NewsCountBadge } from "@/components/news-count-badge";
 import { Pagination } from "@/components/pagination";
 import { SearchBar } from "@/components/search-bar";
 import {
   DASHBOARD_PAGE_SIZE,
   getDashboardArticleCount,
   getDashboardArticles,
+  getTotalArticleCount,
   getUserCategories,
   isCategoryId,
 } from "@/db/queries";
@@ -45,11 +47,13 @@ async function DashboardContent({
   const { category, page: pageParam, q } = await searchParams;
   const requested = typeof category === "string" ? category : undefined;
   const categoryId = isCategoryId(requested) ? requested : undefined;
-  const keyword = (typeof q === "string" ? q.trim() : "").slice(0, 100) || undefined;
+  const keyword =
+    (typeof q === "string" ? q.trim() : "").slice(0, 100) || undefined;
 
-  const [categories, total] = await Promise.all([
+  const [categories, total, totalAll] = await Promise.all([
     getUserCategories(userId),
     getDashboardArticleCount(userId, categoryId, keyword),
+    getTotalArticleCount(),
   ]);
   // 잘못되었거나 범위를 벗어난 page 값은 가까운 유효 페이지로 맞춘다.
   const totalPages = Math.max(1, Math.ceil(total / DASHBOARD_PAGE_SIZE));
@@ -57,11 +61,17 @@ async function DashboardContent({
   const page = Number.isInteger(requestedPage)
     ? Math.min(Math.max(requestedPage, 1), totalPages)
     : 1;
-  const articles = await getDashboardArticles(userId, categoryId, page, keyword);
+  const articles = await getDashboardArticles(
+    userId,
+    categoryId,
+    page,
+    keyword,
+  );
   const now = currentTime();
 
   return (
     <>
+      <NewsCountBadge total={totalAll} />
       <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
         <CategoryBar
           categories={categories}

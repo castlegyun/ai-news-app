@@ -120,6 +120,12 @@ export async function getDashboardArticleCount(
   return row.total;
 }
 
+// 필터와 무관하게 DB에 수집된 전체 기사 수.
+export async function getTotalArticleCount() {
+  const [row] = await db.select({ total: count() }).from(articles);
+  return row.total;
+}
+
 // url이 이미 있는 기사는 건너뛰고, 실제로 새로 저장된 기사 행을 반환한다.
 export async function insertArticles(rows: (typeof articles.$inferInsert)[]) {
   if (rows.length === 0) return [];
@@ -255,6 +261,6 @@ export async function deleteArticle(articleId: string) {
   return rows.length > 0;
 }
 
-export type DashboardArticle =Awaited<
+export type DashboardArticle = Awaited<
   ReturnType<typeof getDashboardArticles>
 >[number];
