@@ -6,6 +6,7 @@ import { Suspense } from "react";
 import { CategoryBar } from "@/components/category-bar";
 import { DashboardHeader } from "@/components/dashboard-header";
 import { NewsCard, currentTime } from "@/components/news-card";
+import { NewsCardSkeleton } from "@/components/news-card-skeleton";
 import { NewsCountBadge } from "@/components/news-count-badge";
 import { Pagination } from "@/components/pagination";
 import { SearchBar } from "@/components/search-bar";
@@ -119,10 +120,7 @@ function DashboardSkeleton() {
       </div>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {Array.from({ length: 6 }, (_, i) => (
-          <div
-            key={i}
-            className="h-52 animate-pulse rounded-xl bg-zinc-200 dark:bg-zinc-800"
-          />
+          <NewsCardSkeleton key={i} />
         ))}
       </div>
     </div>
