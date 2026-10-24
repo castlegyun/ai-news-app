@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
 import { CategoryBar } from "@/components/category-bar";
+import { DashboardFooter } from "@/components/dashboard-footer";
 import { DashboardHeader } from "@/components/dashboard-header";
 import { NewsCard, currentTime } from "@/components/news-card";
 import { NewsCardSkeleton } from "@/components/news-card-skeleton";
@@ -25,13 +26,14 @@ export default function DashboardPage({
   searchParams,
 }: PageProps<"/dashboard">) {
   return (
-    <div className="flex-1 bg-zinc-50 dark:bg-zinc-950">
+    <div className="flex flex-1 flex-col bg-zinc-50 dark:bg-zinc-950">
       <DashboardHeader />
-      <main className="mx-auto w-full max-w-6xl space-y-6 px-4 py-6 sm:px-6">
+      <main className="mx-auto w-full max-w-6xl flex-1 space-y-6 px-4 py-6 sm:px-6">
         <Suspense fallback={<DashboardSkeleton />}>
           <DashboardContent searchParams={searchParams} />
         </Suspense>
       </main>
+      <DashboardFooter />
     </div>
   );
 }
