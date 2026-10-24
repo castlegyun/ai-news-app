@@ -7,7 +7,7 @@
 - **깔끔함:** 장식을 줄이고 여백과 얇은 테두리로 영역을 나눈다. 그림자는 쓰더라도 약하게(`shadow-sm`) 쓴다.
 - **읽기 편함:** 본문은 충분한 행간(`leading-relaxed`)과 중간 명도의 회색 텍스트로 쓴다. 한 카드에서 가장 눈에 띄는 것은 한국어 제목이다.
 - **일관성:** 간격은 4의 배수(Tailwind 기본 스케일), 모서리는 `rounded-xl`(카드)·`rounded-full`(칩·뱃지)·`rounded-lg`(버튼)로 통일한다.
-- **다크 모드:** `prefers-color-scheme`을 따른다. 색을 지정할 때는 `dark:` 변형을 항상 함께 쓴다.
+- **다크 모드:** `<html>`의 `.dark` 클래스로 전환한다(`globals.css`의 `@custom-variant dark`). 처음 방문하면 `prefers-color-scheme`을 따르고, 오른쪽 위 토글(`ThemeToggle`)로 바꾼 값은 `localStorage`(`theme`)에 저장된다. `layout.tsx`의 초기화 스크립트가 첫 페인트 전에 클래스를 붙여 깜빡임을 막는다. 색을 지정할 때는 `dark:` 변형을 항상 함께 쓴다.
 
 ## 2. 디자인 토큰
 
@@ -52,7 +52,7 @@
 ### 4.1 헤더
 
 - 좌측: 앱 이름 `AI 뉴스 수집기` (`text-lg font-semibold`).
-- 우측: '뉴스 가져오기' 버튼, 그 오른쪽에 Clerk `UserButton`.
+- 우측: '뉴스 가져오기' 버튼, 다크 모드 토글(아이콘 버튼, 라이트에서는 달·다크에서는 해), Clerk `UserButton` 순서. 비로그인 화면에서는 토글만 오른쪽 위에 고정(`fixed top-3 right-4`)한다.
 - 클래스: `sticky top-0 z-10 flex items-center justify-between border-b border-zinc-200 bg-white/80 px-4 py-3 backdrop-blur sm:px-6 dark:border-zinc-800 dark:bg-zinc-900/80`.
 
 **'뉴스 가져오기' 버튼 (주요 버튼)**

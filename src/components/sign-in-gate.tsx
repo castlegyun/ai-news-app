@@ -3,6 +3,8 @@
 import { useAuth, useClerk } from "@clerk/nextjs";
 import { useEffect } from "react";
 
+import { ThemeToggle } from "@/components/theme-toggle";
+
 // 비로그인 상태로 접속하면 로그인 모달을 자동으로 연다.
 export function SignInGate() {
   const { openSignIn } = useClerk();
@@ -15,6 +17,7 @@ export function SignInGate() {
 
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-4 p-8 text-center">
+      <ThemeToggle className="fixed top-3 right-4 sm:right-6" />
       <h1 className="text-2xl font-semibold">AI 뉴스 수집기</h1>
       <p className="text-zinc-600 dark:text-zinc-400">
         해외 AI 뉴스를 한국어로 모아보려면 로그인이 필요합니다.
