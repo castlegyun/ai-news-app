@@ -103,36 +103,39 @@ dark:border-zinc-700 dark:text-zinc-400 dark:hover:border-indigo-400 dark:hover:
 
 한 기사를 한 장의 카드로 보여준다. 요소 순서는 위에서 아래로 다음과 같다.
 
-1. 메타 행: 출처(`TechCrunch`/`The Verge`) · 게시 시각(예: `3시간 전`) — `text-xs text-zinc-500`
-2. 한국어 제목 — `text-base font-semibold leading-snug text-zinc-900 dark:text-zinc-50`
-3. 한국어 요약 — `text-sm leading-relaxed text-zinc-600 dark:text-zinc-400`, `line-clamp-4`
-4. 하단 행: 카테고리 뱃지(좌), 원문 링크와 'Notion 저장' 버튼(우)
+1. 상단: 출처(좌, `font-medium text-zinc-700 dark:text-zinc-300`)와 게시 시각(우, `tabular-nums text-zinc-500 dark:text-zinc-400`) — `text-xs`, 가운뎃점 없음
+2. 한국어 제목 — `text-lg font-semibold leading-snug tracking-tight break-keep text-zinc-900 dark:text-zinc-50`
+3. 한국어 요약 — `text-[15px] leading-7 break-keep text-zinc-600 dark:text-zinc-400`, `line-clamp-4`
+4. 하단 행(구분선 아래): 카테고리 라벨(좌), 원문 링크와 'Notion 저장' 버튼(우)
 
 **카드 컨테이너**
 
 ```
-flex h-full flex-col gap-3 rounded-xl border border-zinc-200 bg-white p-5 shadow-sm
-transition-shadow hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900
+group relative flex h-full flex-col gap-4 overflow-hidden rounded-xl border border-zinc-200 bg-white
+py-6 pr-6 pl-7 shadow-sm transition-[border-color,box-shadow] duration-200
+hover:border-zinc-300 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-700
 ```
 
-- 하단 행은 `mt-auto flex items-center justify-between gap-2 pt-2`로 두어 카드 높이가 달라도 같은 줄에 정렬되게 한다.
+- **카테고리 색 막대:** 카드 왼쪽 가장자리에 `absolute inset-y-6 left-0 w-1 rounded-r-full`. 색은 `categories.color`(인라인 스타일), 미분류는 `bg-zinc-300 dark:bg-zinc-600`. 호버하면 `group-hover:inset-y-0`으로 카드 높이만큼 늘어난다(`motion-reduce`에서는 전환 없음). 카드가 떠오르는 효과는 쓰지 않는다.
+- 한글은 `break-keep`으로 어절 단위 줄바꿈한다.
+- 삭제(✕) 버튼은 데스크톱(`md`~)에서 hover·포커스 때만 보이고, 모바일에서는 항상 보인다. 클래스: `md:opacity-0 md:group-hover:opacity-100 focus-visible:opacity-100` (카드 컨테이너의 `group` 필요).
+- 하단 행은 `mt-auto flex items-center justify-between gap-3 border-t border-zinc-100 pt-4 dark:border-zinc-800`로 두어 카드 높이가 달라도 같은 줄에 정렬되게 한다.
 - 제목은 원문이 아니라 한국어 제목(`titleKo`)을 쓰고, 번역 전 기사는 원문 제목을 대신 보여준다.
 - 시간 표기는 상대 시각(`방금 전`, `N분 전`, `N시간 전`, `N일 전`)을 쓰고, 7일을 넘으면 `YYYY. M. D.`로 표기한다. `<time dateTime>`에 ISO 값을 넣는다.
 - 목록은 게시 시각 기준 최신순이다.
 
-**카테고리 뱃지**
+**카테고리 라벨**
 
 ```
-inline-flex items-center rounded-full bg-indigo-50 px-2.5 py-0.5 text-xs font-medium text-indigo-700
-dark:bg-indigo-500/15 dark:text-indigo-300
+inline-flex min-w-0 items-center gap-2 text-sm font-medium text-zinc-700 dark:text-zinc-300
 ```
 
-- `categories.color`는 `#RRGGBB` 값이므로 Tailwind 클래스 대신 인라인 스타일로 입힌다: 글자색은 `color`, 배경은 같은 색에 알파 `1A`를 붙인 값(`${color}1A`).
-- 미분류 기사는 `bg-zinc-100 text-zinc-600` 회색 뱃지로 `기타`를 표시한다.
+- 앞에 `size-2 rounded-full` 색 점을 둔다. `categories.color`는 `#RRGGBB` 값이므로 Tailwind 클래스 대신 인라인 스타일(`backgroundColor`)로 입힌다.
+- 미분류 기사는 `bg-zinc-300 dark:bg-zinc-600` 회색 점과 `기타`를 표시한다.
 
 **원문 링크**
 
-- `원문 보기 ↗` 텍스트 링크: `text-sm text-zinc-500 underline-offset-2 hover:text-zinc-900 hover:underline dark:hover:text-zinc-100`.
+- `원문 보기 ↗` 텍스트 링크: `text-sm text-zinc-500 underline-offset-2 transition-colors hover:text-zinc-900 hover:underline dark:text-zinc-400 dark:hover:text-zinc-100`.
 - `target="_blank" rel="noopener noreferrer"`로 새 탭에서 연다.
 
 **'Notion 저장' 버튼 (보조 버튼)**

@@ -21,7 +21,9 @@ export function DeleteButton({ articleId }: { articleId: string }) {
       const res = await fetch(`/api/news/${articleId}`, { method: "DELETE" });
       const data: { error?: string } = await res.json().catch(() => ({}));
       if (!res.ok) {
-        setError(data.error ?? "기사를 삭제하지 못했습니다. 다시 시도해 주세요.");
+        setError(
+          data.error ?? "기사를 삭제하지 못했습니다. 다시 시도해 주세요.",
+        );
         setDeleting(false);
         return;
       }
@@ -40,7 +42,7 @@ export function DeleteButton({ articleId }: { articleId: string }) {
         onClick={handleClick}
         disabled={deleting}
         aria-label="기사 삭제"
-        className="absolute right-3 top-3 flex size-7 items-center justify-center rounded-full text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 disabled:opacity-50 dark:hover:bg-zinc-800 dark:hover:text-zinc-200"
+        className="absolute right-3 top-3 flex size-7 items-center justify-center rounded-full text-zinc-400 transition hover:bg-zinc-100 hover:text-zinc-700 md:opacity-0 md:group-hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 disabled:opacity-50 dark:hover:bg-zinc-800 dark:hover:text-zinc-200"
       >
         <span aria-hidden="true">✕</span>
       </button>
