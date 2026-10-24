@@ -3,6 +3,7 @@
 import { UserButton } from "@clerk/nextjs";
 
 import { FetchNewsButton } from "@/components/fetch-news-button";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export function DashboardHeader() {
   return (
@@ -12,6 +13,7 @@ export function DashboardHeader() {
       </h1>
       <div className="flex items-center gap-3">
         <FetchNewsButton />
+        <ThemeToggle />
         <UserButton />
       </div>
     </header>
