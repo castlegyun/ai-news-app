@@ -1,11 +1,11 @@
 import Link from "next/link";
 
 const chipBase =
-  "rounded-full border px-3.5 py-1.5 text-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500";
+  "border-b-2 px-1 py-3 text-base font-bold tracking-[1.5px] uppercase transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground";
 const chipIdle =
-  "border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800";
+  "border-transparent text-body hover:border-hairline hover:text-foreground";
 const chipActive =
-  "border-transparent bg-indigo-600 text-white hover:bg-indigo-600 dark:bg-indigo-500";
+  "border-foreground text-foreground";
 
 type Category = { id: string; name: string };
 
@@ -28,7 +28,7 @@ export function CategoryBar({
   };
 
   return (
-    <nav aria-label="카테고리" className="flex flex-wrap items-center gap-2">
+    <nav aria-label="카테고리" className="flex flex-wrap items-center gap-x-8 gap-y-2">
       <Link
         href={href()}
         aria-current={activeId ? undefined : "true"}
@@ -51,7 +51,7 @@ export function CategoryBar({
         type="button"
         disabled
         title="준비 중입니다"
-        className="inline-flex items-center gap-1 rounded-full border border-dashed border-zinc-300 px-3.5 py-1.5 text-sm text-zinc-500 transition-colors hover:border-indigo-400 hover:text-indigo-600 disabled:cursor-not-allowed disabled:opacity-60 dark:border-zinc-700 dark:text-zinc-400 dark:hover:border-indigo-400 dark:hover:text-indigo-400"
+        className="inline-flex items-center gap-1 px-1 py-3 text-base font-bold tracking-[1.5px] text-muted uppercase transition-colors hover:text-foreground disabled:cursor-not-allowed disabled:opacity-60"
       >
         + 카테고리 추가
       </button>

@@ -72,12 +72,12 @@ export function FetchNewsButton() {
         type="button"
         onClick={handleClick}
         disabled={busy}
-        className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-indigo-500 dark:hover:bg-indigo-400"
+        className="inline-flex h-10 items-center gap-2 border border-foreground bg-foreground px-5 text-xs font-bold tracking-[1.5px] text-background uppercase transition-colors hover:bg-transparent hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground disabled:cursor-not-allowed disabled:opacity-60"
       >
         {busy && (
           <span
             aria-hidden="true"
-            className="size-4 animate-spin rounded-full border-2 border-white/40 border-t-white"
+            className="size-4 animate-spin rounded-full border-2 border-background/40 border-t-background"
           />
         )}
         {busy ? "가져오는 중…" : "뉴스 가져오기"}
@@ -91,8 +91,8 @@ export function FetchNewsButton() {
           <p
             className={
               message.kind === "error"
-                ? "rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300"
-                : "rounded-lg bg-zinc-900 px-4 py-2.5 text-sm text-white shadow-lg dark:bg-zinc-100 dark:text-zinc-900"
+                ? "border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300"
+                : "bg-foreground px-4 py-2.5 text-sm text-background"
             }
           >
             {message.text}

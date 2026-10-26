@@ -18,15 +18,15 @@ export function SignInGate() {
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-4 p-8 text-center">
       <ThemeToggle className="fixed top-3 right-4 sm:right-6" />
-      <h1 className="text-2xl font-semibold">AI 뉴스 수집기</h1>
-      <p className="text-zinc-600 dark:text-zinc-400">
+      <h1 className="text-5xl font-bold tracking-tight uppercase">AI 뉴스 수집기</h1>
+      <p className="font-light text-body">
         해외 AI 뉴스를 한국어로 모아보려면 로그인이 필요합니다.
       </p>
       <button
         type="button"
         disabled={!isLoaded || isSignedIn}
         onClick={() => openSignIn({})}
-        className="rounded-full bg-foreground px-5 py-2 text-background disabled:opacity-50"
+        className="h-12 border border-foreground bg-foreground px-8 text-xs font-bold tracking-[1.5px] text-background uppercase transition-colors hover:bg-transparent hover:text-foreground disabled:opacity-50"
       >
         로그인
       </button>
