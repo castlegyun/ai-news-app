@@ -19,7 +19,7 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
       onClick={handleClick}
       aria-label="다크 모드 전환"
       title="다크 모드 전환"
-      className={`inline-flex size-9 items-center justify-center rounded-lg border border-zinc-200 text-zinc-600 transition-colors hover:bg-zinc-100 hover:text-zinc-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-zinc-50 ${className}`}
+      className={`inline-flex size-9 items-center justify-center border border-hairline text-foreground transition-colors hover:border-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground ${className}`}
     >
       {/* 라이트 모드: 달 아이콘(다크로 전환) */}
       <svg

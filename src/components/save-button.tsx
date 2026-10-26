@@ -49,7 +49,7 @@ export function SaveButton({
       <button
         type="button"
         disabled
-        className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-sm font-medium text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300"
+        className="h-9 border border-emerald-200 bg-emerald-50 px-3 text-xs font-bold tracking-[1.5px] text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300"
       >
         저장됨
       </button>
@@ -62,7 +62,7 @@ export function SaveButton({
         type="button"
         onClick={handleClick}
         disabled={saving}
-        className="rounded-lg border border-zinc-200 px-3 py-1.5 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 disabled:opacity-60 dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-800"
+        className="h-9 border border-foreground px-3 text-xs font-bold tracking-[1.5px] text-foreground transition-colors hover:bg-foreground hover:text-background focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground disabled:opacity-60"
       >
         {saving ? "저장 중…" : "Notion 저장"}
       </button>
@@ -72,7 +72,7 @@ export function SaveButton({
         className="pointer-events-none fixed inset-x-0 bottom-6 z-20 flex justify-center px-4"
       >
         {error && (
-          <p className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300">
+          <p className="border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300">
             {error}
           </p>
         )}

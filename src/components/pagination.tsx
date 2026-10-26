@@ -1,13 +1,13 @@
 import Link from "next/link";
 
 const itemBase =
-  "inline-flex min-w-9 items-center justify-center rounded-lg border px-3 py-1.5 text-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500";
+  "inline-flex h-10 min-w-10 items-center justify-center border px-3 text-xs font-bold tracking-[1.5px] transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground";
 const itemIdle =
-  "border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800";
+  "border-hairline text-body hover:border-foreground hover:text-foreground";
 const itemActive =
-  "border-transparent bg-indigo-600 font-medium text-white dark:bg-indigo-500";
+  "border-foreground bg-foreground text-background";
 const itemDisabled =
-  "cursor-not-allowed border-zinc-200 text-zinc-400 opacity-60 dark:border-zinc-800 dark:text-zinc-600";
+  "cursor-not-allowed border-hairline text-muted opacity-60";
 
 const PAGE_WINDOW = 2;
 
@@ -65,7 +65,7 @@ export function Pagination({
       )}
       {pageItems(page, totalPages).map((p, i) =>
         p === null ? (
-          <span key={`gap-${i}`} aria-hidden="true" className="px-1 text-zinc-500">
+          <span key={`gap-${i}`} aria-hidden="true" className="px-1 text-muted">
             …
           </span>
         ) : (

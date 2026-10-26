@@ -26,7 +26,7 @@ export default function DashboardPage({
   searchParams,
 }: PageProps<"/dashboard">) {
   return (
-    <div className="flex flex-1 flex-col bg-zinc-50 dark:bg-zinc-950">
+    <div className="flex flex-1 flex-col bg-background">
       <DashboardHeader />
       <main className="mx-auto w-full max-w-6xl flex-1 space-y-6 px-4 py-6 sm:px-6">
         <Suspense fallback={<DashboardSkeleton />}>
@@ -84,12 +84,12 @@ async function DashboardContent({
         <SearchBar keyword={keyword} categoryId={categoryId} />
       </div>
       {keyword && (
-        <p className="text-sm text-zinc-500">
+        <p className="text-sm text-muted">
           &lsquo;{keyword}&rsquo; 검색 결과 {total}건
         </p>
       )}
       {articles.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-zinc-300 py-16 text-center text-sm text-zinc-500 dark:border-zinc-700">
+        <div className="border border-dashed border-hairline py-16 text-center text-sm font-light text-muted">
           {keyword
             ? "검색 결과가 없습니다"
             : categoryId
@@ -117,8 +117,8 @@ function DashboardSkeleton() {
   return (
     <div role="status" aria-label="불러오는 중" className="space-y-6">
       <div className="flex justify-between gap-3">
-        <div className="h-9 w-72 animate-pulse rounded-full bg-zinc-200 dark:bg-zinc-800" />
-        <div className="hidden h-10 w-96 animate-pulse rounded-lg bg-zinc-200 lg:block dark:bg-zinc-800" />
+        <div className="h-9 w-72 animate-pulse bg-hairline" />
+        <div className="hidden h-10 w-96 animate-pulse bg-hairline lg:block" />
       </div>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {Array.from({ length: 6 }, (_, i) => (

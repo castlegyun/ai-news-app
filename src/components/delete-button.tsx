@@ -42,7 +42,7 @@ export function DeleteButton({ articleId }: { articleId: string }) {
         onClick={handleClick}
         disabled={deleting}
         aria-label="기사 삭제"
-        className="absolute right-3 top-3 flex size-7 items-center justify-center rounded-full text-zinc-400 transition hover:bg-zinc-100 hover:text-zinc-700 md:opacity-0 md:group-hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 disabled:opacity-50 dark:hover:bg-zinc-800 dark:hover:text-zinc-200"
+        className="absolute right-3 top-3 flex size-7 items-center justify-center rounded-full text-muted transition hover:bg-foreground hover:text-background md:opacity-0 md:group-hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground disabled:opacity-50"
       >
         <span aria-hidden="true">✕</span>
       </button>
@@ -52,7 +52,7 @@ export function DeleteButton({ articleId }: { articleId: string }) {
         className="pointer-events-none fixed inset-x-0 bottom-6 z-20 flex justify-center px-4"
       >
         {error && (
-          <p className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300">
+          <p className="border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300">
             {error}
           </p>
         )}
