@@ -8,7 +8,7 @@ AI 뉴스 수집기: 해외 AI 뉴스를 RSS로 수집하고, Claude로 한국�
 
 UI를 만들거나 수정할 때는 `ui.md`(화면 구성, Tailwind 스타일 규칙, 컴포넌트 가이드)를 먼저 읽고 따를 것.
 
-현재는 `create-next-app` 기본 스캐폴드만 있고 앱 코드는 없다. 아래 기술 스택 중 Next.js 외의 패키지는 **아직 설치되지 않았다**. 구현 단계마다 필요할 때 추가한다.
+구현 현황(기능별 ✅/⏳)은 `PRD.md`의 6장과 11장을 따른다. 코드와 PRD가 어긋나면 코드를 기준으로 PRD를 고친다.
 
 ## 명령어
 
@@ -30,7 +30,7 @@ UI를 만들거나 수정할 때는 `ui.md`(화면 구성, Tailwind 스타일 �
 
 ## 기술 스택 (PRD §7)
 
-Next.js(App Router, TypeScript, `src/` 구조, 임포트 별칭 `@/*`) · Clerk(인증) · Neon(Postgres) + Drizzle ORM · Claude API(`@anthropic-ai/sdk`) · Notion MCP(`@modelcontextprotocol/sdk` 클라이언트) · `rss-parser`
+Next.js(App Router, TypeScript, `src/` 구조, 임포트 별칭 `@/*`) · Clerk(인증) · Neon(Postgres) + Drizzle ORM · Claude API(`@anthropic-ai/sdk`) · Notion REST API(직접 호출) · `rss-parser`
 
 ## 제품 개요와 범위
 
@@ -39,55 +39,20 @@ Next.js(App Router, TypeScript, `src/` 구조, 임포트 별칭 `@/*`) · Clerk(
 - 비목표: 자동/예약 수집(항상 수동 버튼), RSS 소스 사용자 추가·편집, 모바일 네이티브 앱, 댓글·공유.
 - UI와 요약은 모두 한국어.
 
-## 핵심 동작 규칙
+## 핵심 동작 규칙 (구현 기준, 자세한 내용은 PRD.md)
 
-- **인증:** 비로그인 상태에서는 모든 페이지와 API가 차단된다. 모든 API는 인증 검사를 한다. 최초 로그인 시 기본 카테고리를 시드한다(모델/연구, 제품/서비스, 투자/비즈니스, 규제/정책, 기타).
-- **뉴스 가져오기:** 두 RSS를 병렬 수집 → URL 기준으로 이미 저장된 기사는 건너뜀(중복 방지) → 신규 기사만 Claude로 한국어 제목·요약을 생성해 저장. 로딩 상태, 완료 시 신규 기사 수 알림, 실패 시 오류 메시지를 표시한다.
-- **서버리스 제약:** 타임아웃을 고려해 소스당 최대 N개로 제한하고 Claude 호출은 배치로 묶는다. 번역·요약은 신규 기사당 1회만 수행하며, 분류에는 경량 모델을 고려한다.
-- **카드 목록:** 한국어 제목, 한국어 요약, 출처, 게시 시각, 카테고리 뱃지, 원문 링크, 'Notion 저장' 버튼. 최신순 정렬.
-- **분류:** 신규·미분류 기사를 로그인 사용자의 카테고리 기준으로 Claude가 분류하고 결과는 사용자별로 저장한다. 어디에도 맞지 않으면 '기타'(또는 미분류). 카테고리의 설명(분류 힌트)이 분류 프롬프트에 쓰인다.
-- **카테고리 관리:** 사용자별 추가·이름/설명 수정·삭제. 변경 후 '재분류'로 기존 기사에 반영하며, 삭제된 카테고리의 기사는 기타/미분류로 이동한다. 칩으로 필터링하고 '전체'는 모두 표시.
-- **Notion 저장:** Notion 원격 MCP 서버(OAuth)를 사용하고 최초 1회 계정을 연결한다. 클릭하면 제목·요약·카테고리·원문 URL·날짜로 페이지를 생성하고, 버튼이 '저장됨'으로 바뀌며 중복 저장하지 않는다. 미연결 상태에서 클릭하면 연결 흐름으로 안내한다.
-- **보안:** Notion 토큰은 암호화 저장, API 키는 환경변수로만 관리. 필요한 환경변수: Clerk 키, `DATABASE_URL`, `ANTHROPIC_API_KEY`, Notion OAuth 값.
+- **인증:** Clerk. 페이지는 로그인 모달을 띄우기 위해 통과시키고, `/api/*`는 비로그인이면 401로 막는다 (`src/proxy.ts`). 모든 API는 인증을 검사한다.
+- **뉴스 가져오기:** 두 RSS를 병렬 수집 → URL 기준으로 중복 건너뜀 → 신규·미번역 기사만 Claude Haiku로 한국어 제목·요약 생성 → 사용자 카테고리 기준으로 분류. 소스당 30건, 1회 AI 처리 60건 상한, `maxDuration` 60초. 번역·요약은 기사당 1회만 한다.
+- **기본 카테고리:** 모델/연구, 제품/서비스, 투자/비즈니스, 규제/정책, 기타. 사용자가 처음 뉴스를 가져올 때 시드한다.
+- **카드 목록:** 한국어 제목·요약, 출처, 게시 시각, 카테고리 뱃지, 원문 링크, 'Notion 저장'과 삭제 버튼. 최신순, 한 페이지 9개. 카테고리 칩 필터와 키워드 검색(제목·요약).
+- **Notion 저장:** 환경변수의 통합 토큰과 데이터베이스 하나를 모든 사용자가 공유한다. 저장하면 '저장됨'으로 바뀌고 같은 사용자의 같은 기사는 중복 저장하지 않는다.
+- **보안:** API 키와 토큰은 환경변수로만 관리한다. 필요한 환경변수: Clerk 키, `DATABASE_URL`, `ANTHROPIC_API_KEY`, `NOTION_API_TOKEN`, `NOTION_DATABASE_ID`.
 
-## 데이터 모델 (PRD §8)
+## 아직 구현하지 않은 것 (PRD 6.6, 6.7)
 
-- `articles`(공용): id, source, url(unique), title, excerpt, imageUrl, publishedAt, titleKo, summaryKo, createdAt
-- `categories`(사용자별): id, userId, name, description, color, sortOrder
-- `article_categories`: userId, articleId, categoryId
-- `notion_connections`: userId, 암호화된 OAuth 토큰·만료 정보, 대상 페이지/DB ID
-- `saved_articles`: userId, articleId, notionPageId, savedAt
+- 사용자별 카테고리 추가·수정·삭제와 재분류, 관련 API
+- 사용자별 Notion OAuth 연결 (`notion_connections` 테이블은 스키마만 있고 쓰지 않는다)
 
-뉴스(`articles`)만 사용자 간 공용이고, 분류 결과·카테고리·Notion 연결·저장 기록은 사용자별이다.
+## 데이터 모델과 API
 
-## API 경로 (PRD §9, 안)
-
-- `POST /api/news/fetch` — 수집·번역·요약·분류
-- `GET /api/news?category=` — 목록/필터
-- `GET|POST|PATCH|DELETE /api/categories` — 카테고리 CRUD
-- `POST /api/categories/reclassify` — 재분류
-- `GET /api/notion/connect`, `GET /api/notion/callback` — Notion OAuth
-- `POST /api/notion/save` — 기사 Notion 저장
-
-## 구현 단계 (PRD §10)
-
-1. 프로젝트 초기화 + Clerk
-2. Neon/Drizzle 스키마·마이그레이션
-3. RSS 수집
-4. Claude 번역·요약
-5. 카드 UI
-6. 분류 + 카테고리 CRUD/필터
-7. Notion MCP 연동
-
-## 수용 기준 (PRD §11)
-
-- 비로그인 접근이 차단되고, 로그인 후 진입된다.
-- '뉴스 가져오기' 후 카드가 생성되며, 재클릭해도 중복이 없다.
-- 카테고리 필터와 추가·수정·삭제·재분류가 동작한다.
-- 'Notion 저장' 시 실제 Notion 페이지가 생성되고 중복 저장이 방지된다.
-
-## 미결 사항 (구현 시 확정 필요)
-
-- 소스당 수집 최대 개수(N)와 사용할 Claude 모델
-- Notion 저장 대상: 특정 페이지 vs 데이터베이스
-- Notion MCP의 사용자별 OAuth 토큰 저장·갱신이 가장 복잡한 부분(리스크)
+`PRD.md`의 9장(데이터 모델)과 10장(API)을 본다. 요약: 뉴스(`articles`)만 사용자 간 공용이고, 카테고리·분류 결과·저장 기록은 사용자별이다. API는 `POST /api/news/fetch`, `DELETE /api/news/{id}`, `POST /api/notion/save` 세 개이고, 목록 조회는 `/dashboard` 서버 컴포넌트가 DB를 직접 읽는다.
